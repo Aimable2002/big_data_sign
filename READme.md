@@ -51,7 +51,8 @@ This project involves an in-depth analysis of the **Uber Fares Dataset** to unco
 * **Time Series Analysis**: Analyzed temporal patterns, showing peaks during specific hours, days, and months.
 
 **Time-based Pattern Visual**
-![Average Fare by Hour](file-NRe6StNbVMaoeoaeNmozVT)
+![Average Fare by Hour](https://raw.githubusercontent.com/Aimable2002/big_data_sign/main/plots/fare_by_hour.png)
+
 *This chart visualizes how the average fare amount varies by hour of the day.*
 
 ---
