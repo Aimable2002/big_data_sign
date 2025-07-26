@@ -28,7 +28,7 @@ class Main:
 
     def load_csv(self):
         """Load the enhanced dataset from path."""
-        return pd.read_csv('./Dataset/uber_enhanced.csv')
+        return pd.read_csv('./Dataset/uber.csv')
 
     def handle_missing(self, data):
         """Handle missing values."""
@@ -51,19 +51,44 @@ class Main:
         plt.ylabel('Frequency')
         plt.savefig('./plots/fare_distribution.png')
         plt.close()
-
+    
     def plot_fare_vs_distance(self, data):
-        """Plot fare vs. distance (using the existing 'distance_km' column)."""
+        """Plot fare vs. distance using simplified approximation."""
+        if 'distance_km' not in data.columns:
+            data['distance_km'] = data.apply(
+                lambda row: self.haversine_approx(
+                    row['pickup_latitude'],
+                    row['pickup_longitude'],
+                    row['dropoff_latitude'],
+                    row['dropoff_longitude']
+                ),
+                axis=1
+            )
+
         plt.figure(figsize=(10, 6))
         plt.scatter(data['distance_km'], data['fare_amount'], alpha=0.5)
-        plt.title('Fare Amount vs. Distance')
-        plt.xlabel('Distance (km)')
+        plt.title('Fare Amount vs. Approximate Distance')
+        plt.xlabel('Approximate Distance (km)')
         plt.ylabel('Fare ($)')
         plt.savefig('./plots/fare_vs_distance.png')
         plt.close()
 
+    def haversine_approx(self, lat1, lon1, lat2, lon2):
+        """Simplified Haversine-like approximation (no trig functions)."""
+        dx = (lon2 - lon1) * 85  # ~85 km per degree longitude (near NYC)
+        dy = (lat2 - lat1) * 111  # ~111 km per degree latitude
+        return (dx**2 + dy**2) ** 0.5
+
     def plot_fare_by_hour(self, data):
-        """Plot fare by hour."""
+        """Plot fare by hour by extracting hour from pickup_datetime."""
+        # First convert pickup_datetime to datetime format if it's not already
+        if not pd.api.types.is_datetime64_any_dtype(data['pickup_datetime']):
+            data['pickup_datetime'] = pd.to_datetime(data['pickup_datetime'])
+        
+        # Extract hour from datetime
+        data['hour'] = data['pickup_datetime'].dt.hour
+        
+        # Now group by hour
         avg_fare = data.groupby('hour')['fare_amount'].mean()
         
         plt.figure(figsize=(10, 6))
